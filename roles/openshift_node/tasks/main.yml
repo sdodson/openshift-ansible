@@ -15,9 +15,9 @@
   with_items:
   - "{{ openshift_node_cert_dir }}"
   - "{{ openshift_node_cert_dir }}/ca.crt"
-  - "{{ openshift_node_cert_dir }}/client.crt"
-  - "{{ openshift_node_cert_dir }}/client.key"
-  - "{{ openshift_node_cert_dir }}/.kubeconfig"
+  - "{{ openshift_node_cert_dir }}/master-client.crt"
+  - "{{ openshift_node_cert_dir }}/master-client.key"
+  - "{{ openshift_node_cert_dir }}/node.kubeconfig"
   - "{{ openshift_node_cert_dir }}/node-config.yaml"
   - "{{ openshift_node_cert_dir }}/server.crt"
   - "{{ openshift_node_cert_dir }}/server.key"
