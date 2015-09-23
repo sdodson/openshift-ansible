@@ -18,6 +18,10 @@
     msg: "openshift_master_cluster_password must be set for multi-master installations"
   when: openshift_master_ha | bool and openshift_master_cluster_method == "pacemaker" and (openshift_master_cluster_password is not defined or not openshift_master_cluster_password)
 
+- fail:
+    msg: "openshift_master_ha is not yet supported on atomic hosts"
+  when: openshift_master_ha | bool and is_atomic
+
 - name: Set master facts
   openshift_facts:
     role: master
@@ -77,6 +81,25 @@
 - name: Install Master package
   yum: pkg={{ openshift.common.service_type }}-master{{ openshift_version  }} state=present
   register: install_result
+  when: not is_atomic
+
+# TODO: enable when ansible#1993 lands and is widespread enough
+# - name: Docker image present
+#   docker:
+#     image: "{{ openshift.common.docker.image }}"
+#     state: image_present
+#   when: is_atomic
+
+- name: Install Master docker service file
+  template:
+    dest: "/etc/systemd/system/{{ openshift.common.service_type }}-master.service"
+    src: openshift.docker.master.service
+  register: install_result 
+  when: is_atomic
+
+- name: Reload systemd units                                                                        
+  command: systemctl daemon-reload
+  when: is_atomic and install_result | changed
 
 # TODO: These values need to be configurable
 - name: Set dns facts
@@ -117,6 +140,7 @@
   yum: pkg=httpd-tools state=present
   when: item.kind == 'HTPasswdPasswordIdentityProvider'
   with_items: openshift.master.identity_providers
+  when: not is_atomic
 
 - name: Ensure htpasswd directory exists
   file:
@@ -289,6 +313,7 @@
   command: cp {{ openshift_master_config_dir }}/admin.kubeconfig ~{{ item }}/.kube/config
   args:
     creates: ~{{ item }}/.kube/config
+  when: not is_atomic
   with_items:
   - root
   - "{{ ansible_ssh_user }}"
