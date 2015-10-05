@@ -1202,10 +1202,22 @@ class OpenShiftFacts(object):
 
     def init_in_docker_facts(self, facts):
         facts['is_atomic'] = os.path.isfile('/run/ostree-booted')
+        deployment_type = facts['common']['deployment_type']
 
         docker = dict()
-        docker['image_name'] = 'openshift/origin'
-        # TODO: figure out right way to set the version
+        if deployment_type in ['enterprise','openshift-enterprise']:
+            docker['image_name'] = 'openshift3/ose'
+            docker['master_image_name'] = 'aos3/aos-master'
+            docker['node_image_name'] = 'aos3/aos-node'
+        elif deployment_type == 'atomic-enterprise':
+            docker['image_name'] = 'aos3/aos'
+            docker['master_image_name'] = 'aos3/aos-master'
+            docker['node_image_name'] = 'aos3/aos-node'
+        else:
+            docker['image_name'] = 'openshift/origin'
+            docker['master_image_name'] = 'openshift/origin'
+            docker['node_image_name'] = 'openshift/origin'
+
         docker['image_version'] = 'latest'
         docker['image'] = "%s:%s" % (docker['image_name'], docker['image_version'])
 
