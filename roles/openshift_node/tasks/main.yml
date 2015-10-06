@@ -59,6 +59,10 @@
   register: install_result
   when: is_atomic
 
+- name: Reload systemd units
+  command: systemctl daemon-reload
+  when: is_atomic and install_result | changed
+
 # TODO: add the validate parameter when there is a validation command to run
 - name: Create the Node config
   template:
