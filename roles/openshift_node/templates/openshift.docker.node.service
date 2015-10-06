@@ -1,6 +1,7 @@
 [Unit]
 After=docker.service
-Require=docker.service
+After={{ openshift.common.service_type }}-master.service
+Requires=docker.service
 
 [Service]
 EnvironmentFile=/etc/sysconfig/{{ openshift.common.service_type }}-node
