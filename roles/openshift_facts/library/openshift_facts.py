@@ -1206,7 +1206,7 @@ class OpenShiftFacts(object):
 
         docker = dict()
         if deployment_type in ['enterprise','openshift-enterprise']:
-            docker['image_name'] = 'openshift3/ose'
+            docker['image_name'] = 'sdodson/node'
             docker['master_image_name'] = 'aos3/aos-master'
             docker['node_image_name'] = 'aos3/aos-node'
         elif deployment_type == 'atomic-enterprise':
