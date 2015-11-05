@@ -1,6 +1,9 @@
 ---
 - include: evaluate_groups.yml
 
+- include: ../openshift-docker/config.yml
+  when: is_atomic
+
 - include: ../openshift-etcd/config.yml
 
 - include: ../openshift-master/config.yml

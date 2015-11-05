@@ -94,10 +94,10 @@
   template:
     dest: "/etc/systemd/system/{{ openshift.common.service_type }}-master.service"
     src: openshift.docker.master.service
-  register: install_result 
+  register: install_result
   when: is_atomic
 
-- name: Reload systemd units                                                                        
+- name: Reload systemd units
   command: systemctl daemon-reload
   when: is_atomic and install_result | changed
 
@@ -313,7 +313,6 @@
   command: cp {{ openshift_master_config_dir }}/admin.kubeconfig ~{{ item }}/.kube/config
   args:
     creates: ~{{ item }}/.kube/config
-  when: not is_atomic
   with_items:
   - root
   - "{{ ansible_ssh_user }}"

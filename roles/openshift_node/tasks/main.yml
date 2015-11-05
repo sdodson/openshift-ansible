@@ -10,10 +10,6 @@
     msg: "SELinux is disabled, This deployment type requires that SELinux is enabled."
   when: (not ansible_selinux or ansible_selinux.status != 'enabled') and deployment_type in ['enterprise', 'online', 'atomic-enterprise', 'openshift-enterprise']
 
-- fail:
-    msg: "This playbook does not support using SDN on atomic hosts yet"
-  when: openshift.common.use_openshift_sdn and is_atomic
-
 - name: Set node facts
   openshift_facts:
     role: "{{ item.role }}"
@@ -56,12 +52,24 @@
   template:
     dest: "/etc/systemd/system/{{ openshift.common.service_type }}-node.service"
     src: openshift.docker.node.service
-  register: install_result
+  register: install_node_result
+  when: is_atomic
+
+- name: Install OpenvSwitch docker service file
+  template:
+    dest: "/etc/systemd/system/openvswitch.service"
+    src: openvswitch.docker.service
+  register: install_ovs_result
   when: is_atomic
 
 - name: Reload systemd units
   command: systemctl daemon-reload
-  when: is_atomic and install_result | changed
+  when: is_atomic and ( ( install_node_result  | changed )
+    or ( install_ovs_result | changed ) )
+
+- name: Start and enable openvswitch docker service
+  service: name=openvswitch.service enabled=yes state=started
+  when: is_atomic
 
 # TODO: add the validate parameter when there is a validation command to run
 - name: Create the Node config
@@ -95,9 +103,9 @@
     dest: /etc/sysconfig/docker
     regexp: '^OPTIONS=.*$'
     line: "OPTIONS='--insecure-registry={{ openshift.node.portal_net }} \
-{% if ansible_selinux and ansible_selinux.status == '''enabled''' %}--selinux-enabled{% endif %} \
-{% if openshift.node.docker_log_driver is defined  %} --log-driver {{ openshift.node.docker_log_driver }}  {% endif %} \
-{% if openshift.node.docker_log_options is defined %}   {{ openshift.node.docker_log_options |  oo_split() | oo_prepend_strings_in_list('--log-opt ') | join(' ')}}  {% endif %} '"
+      {% if ansible_selinux and ansible_selinux.status == '''enabled''' %}--selinux-enabled{% endif %} \
+      {% if openshift.node.docker_log_driver is defined  %} --log-driver {{ openshift.node.docker_log_driver }}  {% endif %} \
+      {% if openshift.node.docker_log_options is defined %}   {{ openshift.node.docker_log_options |  oo_split() | oo_prepend_strings_in_list('--log-opt ') | join(' ')}}  {% endif %} '"
   when: docker_check.stat.isreg
   notify:
     - restart docker
