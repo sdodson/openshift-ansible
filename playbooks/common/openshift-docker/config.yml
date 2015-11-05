@@ -1,4 +1,4 @@
-- name: Set etcd facts needed for generating certs
+- name: Set facts necessary to configure docker
   hosts:
     - masters
     - nodes
@@ -13,7 +13,7 @@
         local_facts:
           deployment_type: "{{ openshift_deployment_type }}"
 
-- name: Configure docker for containerized installs
+- name: Configure docker for additional repositories
   hosts:
     - masters
     - nodes
@@ -21,17 +21,21 @@
     - name: restart docker
       service: name=docker state=restarted
   tasks:
+    # TODO -- currently this is sane to do on masters since we require
+    # that a master be part of the sdn which requires node and docker packages
+    # When we fix the SDN to work without a running node we should clean this up
+    - yum: name=docker state=installed
     - stat: path=/etc/sysconfig/docker
       register: docker_check
     - set_fact:
         docker_additional_registries: "{{ lookup('oo_option', 'docker_additional_registries')
                                         | oo_split() | union(['registry.access.redhat.com'])
                                         |  difference(['']) }}"
-      when: openshift.common.deployment_type == 'enterprise'
+      when: openshift.common.deployment_type in ['enterprise','atomic-enterprise','openshift-enterprise']
     - set_fact:
         docker_additional_registries: "{{ lookup('oo_option', 'docker_additional_registries')
                                       | oo_split() | difference(['']) }}"
-      when: openshift.common.deployment_type != 'enterprise'
+      when: openshift.common.deployment_type not in ['enterprise','atomic-enterprise','openshift-enterprise']
     - name: Add personal registries
       lineinfile:
         dest: /etc/sysconfig/docker
@@ -63,3 +67,18 @@
           lookup('oo_option', 'docker_insecure_registries') != ''
       notify:
         - restart docker
+
+# If we don't pre-fect images containerized installations fail
+- name: Pre-fetch images for containerized installs
+  hosts:
+    - masters
+    - nodes
+  tasks:
+    - name: Pull base image
+      command: docker pull {{ openshift.docker.master_image }}
+      when: is_atomic
+    - name: Pull node image
+      command: docker pull {{ openshift.docker.node_image }}
+    - name: Pull openvswitch image
+      command: docker pull {{ openshift.docker.ovs_image }}
+      when: openshift.common.use_openshift_sdn and is_atomic
