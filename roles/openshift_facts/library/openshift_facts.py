@@ -1204,28 +1204,32 @@ class OpenShiftFacts(object):
         facts['is_atomic'] = os.path.isfile('/run/ostree-booted')
         deployment_type = facts['common']['deployment_type']
 
+        # TODO: Most of these shouldn't actually make it into the facts
         docker = dict()
         if deployment_type in ['enterprise','openshift-enterprise']:
-            docker['image_name'] = 'sdodson/node'
-            docker['master_image_name'] = 'aos3/aos-master'
-            docker['node_image_name'] = 'aos3/aos-node'
+            docker['master_image_name'] = 'openshift3/ose'
+            docker['ovs_image_name'] = 'openshift3/openvswitch'
+            docker['node_image_name'] = 'openshift3/node'
         elif deployment_type == 'atomic-enterprise':
-            docker['image_name'] = 'aos3/aos'
-            docker['master_image_name'] = 'aos3/aos-master'
-            docker['node_image_name'] = 'aos3/aos-node'
+            docker['master_image_name'] = 'aep3/aep'
+            docker['ovs_image_name'] = 'aep3/openvswitch'
+            docker['node_image_name'] = 'aos3/node'
         else:
-            docker['image_name'] = 'openshift/origin'
             docker['master_image_name'] = 'openshift/origin'
-            docker['node_image_name'] = 'openshift/origin'
+            docker['ovs_image_name'] = 'openshift/openvswitch'
+            docker['node_image_name'] = 'openshift/node'
 
         docker['image_version'] = 'latest'
-        docker['image'] = "%s:%s" % (docker['image_name'], docker['image_version'])
+
+        docker['master_image'] = "%s:%s" % (docker['master_image_name'], docker['image_version'])
+        docker['ovs_image'] = "%s:%s" % (docker['ovs_image_name'], docker['image_version'])
+        docker['node_image'] = "%s:%s" % (docker['node_image_name'], docker['image_version'])
 
         # shared /tmp/openshift vol is for file exchange with ansible
         # --privileged is required to read the config dir
         # --net host to access openshift from the container
         # maybe -v /var/run/docker.sock:/var/run/docker.sock is required as well
-        docker['runner'] = "docker run --rm --privileged --net host -v /tmp/openshift:/tmp/openshift -v {datadir}:{datadir} -v {confdir}:{confdir} -e KUBECONFIG={confdir}/master/admin.kubeconfig {image}".format(confdir=facts['common']['config_base'], datadir=facts['common']['data_dir'], image=docker['image'])
+        docker['runner'] = "docker run --rm --privileged --net host -v /tmp/openshift:/tmp/openshift -v {datadir}:{datadir} -v {confdir}:{confdir} -e KUBECONFIG={confdir}/master/admin.kubeconfig {image}".format(confdir=facts['common']['config_base'], datadir=facts['common']['data_dir'], image=docker['master_image'])
 
         if facts['is_atomic']:
             facts['common']['client_binary'] = '%s cli' % docker['runner']
