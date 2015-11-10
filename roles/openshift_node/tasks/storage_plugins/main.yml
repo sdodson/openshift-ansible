@@ -3,12 +3,12 @@
 # additional package dependencies
 - name: NFS storage plugin configuration
   include: nfs.yml
-  when: not is_atomic
+  when: not is_containerized
 
 - name: GlusterFS storage plugin configuration
   include: glusterfs.yml
-  when: ( "'glusterfs' in openshift.node.storage_plugin_deps" ) and not is_atomic
+  when: ( "'glusterfs' in openshift.node.storage_plugin_deps" ) and not is_containerized
 
 - name: Ceph storage plugin configuration
   include: ceph.yml
-  when: ( "'ceph' in openshift.node.storage_plugin_deps" ) and not is_atomic
+  when: ( "'ceph' in openshift.node.storage_plugin_deps" ) and not is_containerized

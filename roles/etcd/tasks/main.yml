@@ -9,7 +9,12 @@
 
 - name: Install etcd
   yum: pkg=etcd-2.* state=present
-  when: not is_atomic
+  when: not is_containerized
+
+- name: Pull etcd container
+  command: >
+    docker pull {{ openshift.docker.etcd_image }}
+  when: is_containerized
 
 - name: Validate permissions on the config dir
   file:

@@ -2,7 +2,7 @@
 - name: Install the base package for admin tooling
   yum: pkg={{ openshift.common.service_type }}{{ openshift_version  }} state=present
   register: install_result
-  when: not is_atomic
+  when: not is_containerized
 
 - name: Reload generated facts
   openshift_facts:

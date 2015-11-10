@@ -11,14 +11,19 @@
   register: s
   changed_when: false
 
-- name: Init the is_atomic fact
+- name: Init the is_atomic and is_containerized fact
   set_fact:
     is_atomic: false
+    is_containerized: false
 
 - name: Set the is_atomic fact
   set_fact:
     is_atomic: true
   when: s.stat.exists
+
+- name: Set the is_containerized fact
+  set_fact:
+    is_containerized: is_atomic or containerized | default(False)
 
 - name: Ensure PyYaml is installed
   yum: pkg={{ item }} state=installed

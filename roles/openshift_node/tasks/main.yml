@@ -40,36 +40,36 @@
 - name: Install Node package
   yum: pkg={{ openshift.common.service_type }}-node{{ openshift_version  }},tuned-profiles-{{ openshift.common.service_type }}-node{{ openshift_version  }} state=present
   register: node_install_result
-  when: not is_atomic
+  when: not is_containerized
 
 # TODO: figure out what to do on atomic hosts
 - name: Install sdn-ovs package
   yum: pkg={{ openshift.common.service_type }}-sdn-ovs{{ openshift_version }} state=present
   register: sdn_install_result
-  when: openshift.common.use_openshift_sdn and not is_atomic
+  when: openshift.common.use_openshift_sdn and not is_containerized
 
 - name: Install Node docker service file
   template:
     dest: "/etc/systemd/system/{{ openshift.common.service_type }}-node.service"
     src: openshift.docker.node.service
   register: install_node_result
-  when: is_atomic
+  when: is_containerized
 
 - name: Install OpenvSwitch docker service file
   template:
     dest: "/etc/systemd/system/openvswitch.service"
     src: openvswitch.docker.service
   register: install_ovs_result
-  when: is_atomic
+  when: is_containerized
 
 - name: Reload systemd units
   command: systemctl daemon-reload
-  when: is_atomic and ( ( install_node_result  | changed )
+  when: is_containerized and ( ( install_node_result  | changed )
     or ( install_ovs_result | changed ) )
 
 - name: Start and enable openvswitch docker service
   service: name=openvswitch.service enabled=yes state=started
-  when: is_atomic
+  when: is_containerized
 
 # TODO: add the validate parameter when there is a validation command to run
 - name: Create the Node config
