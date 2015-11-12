@@ -1214,7 +1214,7 @@ class OpenShiftFacts(object):
         elif deployment_type == 'atomic-enterprise':
             docker['master_image_name'] = 'aep3/aep'
             docker['ovs_image_name'] = 'aep3/openvswitch'
-            docker['node_image_name'] = 'aos3/node'
+            docker['node_image_name'] = 'aep3/node'
             docker['etcd_image_name'] = 'registry.access.redhat.com/rhel7/etcd'
         else:
             docker['master_image_name'] = 'openshift/origin'
