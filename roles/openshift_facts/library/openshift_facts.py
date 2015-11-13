@@ -1210,17 +1210,17 @@ class OpenShiftFacts(object):
             docker['master_image_name'] = 'openshift3/ose'
             docker['ovs_image_name'] = 'openshift3/openvswitch'
             docker['node_image_name'] = 'openshift3/node'
-            docker['etcd_image_name'] = 'registry.access.redhat.com/rhel7/etcd'
+            docker['etcd_image_name'] = 'rhel7/etcd'
         elif deployment_type == 'atomic-enterprise':
             docker['master_image_name'] = 'aep3/aep'
             docker['ovs_image_name'] = 'aep3/openvswitch'
             docker['node_image_name'] = 'aep3/node'
-            docker['etcd_image_name'] = 'registry.access.redhat.com/rhel7/etcd'
+            docker['etcd_image_name'] = 'rhel7/etcd'
         else:
             docker['master_image_name'] = 'openshift/origin'
             docker['ovs_image_name'] = 'openshift/openvswitch'
             docker['node_image_name'] = 'openshift/node'
-            docker['etcd_image_name'] = 'registry.access.redhat.com/rhel7/etcd'
+            docker['etcd_image_name'] = 'rhel7/etcd'
 
         docker['image_version'] = 'latest'
         docker['etcd_image_version'] = 'latest'

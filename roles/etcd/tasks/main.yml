@@ -16,6 +16,24 @@
     docker pull {{ openshift.docker.etcd_image }}
   when: is_containerized
 
+- name: Install etcd container service file
+  template:
+    dest: "/etc/systemd/system/etcd_container.service"
+    src: etcd.docker.service
+  register: install_etcd_result
+  when: is_containerized
+
+- name: Disable system etcd when containerized
+  when: is_containerized
+  service:
+    name: etcd
+    state: stopped
+    enabled: no
+
+- name: Reload systemd units
+  command: systemctl daemon-reload
+  when: is_containerized and ( install_etcd_result | changed )
+
 - name: Validate permissions on the config dir
   file:
     path: "{{ etcd_conf_dir }}"
@@ -58,7 +76,7 @@
 
 - name: Enable etcd
   service:
-    name: etcd
+    name: "{{ etcd_service }}"
     state: started
     enabled: yes
   register: start_result
