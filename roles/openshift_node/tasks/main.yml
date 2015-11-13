@@ -36,31 +36,30 @@
       storage_plugin_deps: "{{ osn_storage_plugin_deps | default(None) }}"
 
 # We have to add tuned-profiles in the same transaction otherwise we run into depsolving
-# problems because the rpms don't pin the version properly.
+# problems because the rpms don't pin the version properly. This was fixed in 3.1 packaging.
 - name: Install Node package
   yum: pkg={{ openshift.common.service_type }}-node{{ openshift_version  }},tuned-profiles-{{ openshift.common.service_type }}-node{{ openshift_version  }} state=present
   register: node_install_result
-  when: not is_containerized
+  when: not is_containerized | bool
 
-# TODO: figure out what to do on atomic hosts
 - name: Install sdn-ovs package
   yum: pkg={{ openshift.common.service_type }}-sdn-ovs{{ openshift_version }} state=present
   register: sdn_install_result
-  when: openshift.common.use_openshift_sdn and not is_containerized
+  when: openshift.common.use_openshift_sdn and not is_containerized | bool
 
 - name: Install Node docker service file
   template:
     dest: "/etc/systemd/system/{{ openshift.common.service_type }}-node.service"
     src: openshift.docker.node.service
   register: install_node_result
-  when: is_containerized
+  when: is_containerized | bool
 
 - name: Install OpenvSwitch docker service file
   template:
     dest: "/etc/systemd/system/openvswitch.service"
     src: openvswitch.docker.service
   register: install_ovs_result
-  when: is_containerized
+  when: is_containerized | bool
 
 - name: Reload systemd units
   command: systemctl daemon-reload
@@ -69,7 +68,7 @@
 
 - name: Start and enable openvswitch docker service
   service: name=openvswitch.service enabled=yes state=started
-  when: is_containerized
+  when: is_containerized | bool
 
 # TODO: add the validate parameter when there is a validation command to run
 - name: Create the Node config

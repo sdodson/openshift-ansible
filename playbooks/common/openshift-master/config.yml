@@ -332,7 +332,7 @@
   roles:
   - openshift_master
   - role: nickhammond.logrotate
-    when: not is_containerized
+    when: not is_containerized | bool
   - role: fluentd_master
     when: openshift.common.use_fluentd | bool
   post_tasks:

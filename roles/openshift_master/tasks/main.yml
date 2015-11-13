@@ -20,7 +20,7 @@
 
 - fail:
     msg: "openshift_master_ha is not yet supported on atomic hosts"
-  when: openshift_master_ha | bool and is_containerized
+  when: openshift_master_ha | bool and is_containerized | bool
 
 - name: Set master facts
   openshift_facts:
@@ -81,21 +81,21 @@
 - name: Install Master package
   yum: pkg={{ openshift.common.service_type }}-master{{ openshift_version  }} state=present
   register: install_result
-  when: not is_containerized
+  when: not is_containerized | bool
 
 # TODO: enable when ansible#1993 lands and is widespread enough
 # - name: Docker image present
 #   docker:
 #     image: "{{ openshift.common.docker.image }}"
 #     state: image_present
-#   when: is_containerized
+#   when: is_containerized | bool
 
 - name: Install Master docker service file
   template:
     dest: "/etc/systemd/system/{{ openshift.common.service_type }}-master.service"
     src: openshift.docker.master.service
   register: install_result
-  when: is_containerized
+  when: is_containerized | bool
 
 - name: Reload systemd units
   command: systemctl daemon-reload
@@ -140,7 +140,7 @@
   yum: pkg=httpd-tools state=present
   when: item.kind == 'HTPasswdPasswordIdentityProvider'
   with_items: openshift.master.identity_providers
-  when: not is_containerized
+  when: not is_containerized | bool
 
 - name: Ensure htpasswd directory exists
   file:

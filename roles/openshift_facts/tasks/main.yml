@@ -23,8 +23,8 @@
 
 - name: Set the is_containerized fact
   set_fact:
-    is_containerized: is_atomic or containerized | default(False)
-
+    is_containerized: "{{ is_atomic or containerized | default(false) | bool }}"
+    
 - name: Ensure PyYaml is installed
   yum: pkg={{ item }} state=installed
   with_items:

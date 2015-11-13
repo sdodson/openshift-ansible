@@ -9,22 +9,22 @@
 
 - name: Install etcd
   yum: pkg=etcd-2.* state=present
-  when: not is_containerized
+  when: not is_containerized | bool
 
 - name: Pull etcd container
   command: >
     docker pull {{ openshift.docker.etcd_image }}
-  when: is_containerized
+  when: is_containerized | bool
 
 - name: Install etcd container service file
   template:
     dest: "/etc/systemd/system/etcd_container.service"
     src: etcd.docker.service
   register: install_etcd_result
-  when: is_containerized
+  when: is_containerized | bool
 
 - name: Disable system etcd when containerized
-  when: is_containerized
+  when: is_containerized | bool
   service:
     name: etcd
     state: stopped

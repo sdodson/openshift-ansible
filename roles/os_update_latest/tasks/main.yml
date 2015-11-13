@@ -1,8 +1,8 @@
 ---
 - fail:
     msg: "Update is not yet supported by this playbook on atomic hosts"
-  when: is_containerized
+  when: is_containerized | bool
 
 - name: Update all packages
   yum: name=* state=latest
-  when: not is_containerized
+  when: not is_containerized | bool

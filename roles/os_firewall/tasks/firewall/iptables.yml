@@ -7,7 +7,7 @@
   - iptables
   - iptables-services
   register: install_result
-  when: not is_containerized
+  when: not is_containerized | bool
 
 - name: Check if firewalld is installed
   command: rpm -q firewalld
