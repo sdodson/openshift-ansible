@@ -22,6 +22,14 @@
     src: etcd.docker.service
   register: install_etcd_result
   when: is_containerized | bool
+  
+- name: Ensure etcd datadir exists
+  when: is_containerized | bool
+  file:
+    path: "{{ etcd_data_dir }}"
+    state: directory
+    mode: 0700
+  
 
 - name: Disable system etcd when containerized
   when: is_containerized | bool
