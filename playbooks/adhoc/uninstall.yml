@@ -49,6 +49,7 @@
         - origin-master-controllers
         - origin-node
         - pcsd
+      failed_when: false
 
     - name: Remove packages
       yum: name={{ item }} state=absent
@@ -164,11 +165,12 @@
         - /etc/openshift
         - /etc/openshift-sdn
         - /etc/origin
-        - /etc/systemd/system/atomic-enterprise-master
-        - /etc/systemd/system/atomic-enterprise-master-api
-        - /etc/systemd/system/atomic-enterprise-master-controllers
-        - /etc/systemd/system/atomic-enterprise-node
-        - /etc/systemd/system/openvswitch
+        - /etc/systemd/system/atomic-openshift-master.service
+        - /etc/systemd/system/atomic-openshift-master-api.service
+        - /etc/systemd/system/atomic-openshift-master-controllers.service
+        - /etc/systemd/system/atomic-openshift-node.service
+        - /etc/systemd/system/etcd_container.service
+        - /etc/systemd/system/openvswitch.service
         - /etc/sysconfig/atomic-enterprise-master
         - /etc/sysconfig/atomic-enterprise-master-api
         - /etc/sysconfig/atomic-enterprise-master-controllers
