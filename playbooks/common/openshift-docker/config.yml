@@ -67,19 +67,3 @@
           lookup('oo_option', 'docker_insecure_registries') != ''
       notify:
         - restart docker
-
-# If we don't pre-fetch images containerized installations fail more often than not
-- name: Pre-fetch images for containerized installs
-  hosts:
-    - masters
-    - nodes
-  tasks:
-    - name: Pull base image
-      command: docker pull {{ openshift.docker.master_image }}
-      when: is_containerized | bool
-    - name: Pull node image
-      command: docker pull {{ openshift.docker.node_image }}
-      when: is_containerized | bool
-    - name: Pull openvswitch image
-      command: docker pull {{ openshift.docker.ovs_image }}
-      when: openshift.common.use_openshift_sdn and is_containerized | bool

@@ -1032,7 +1032,7 @@ class OpenShiftFacts(object):
         facts = set_version_facts_if_unset(facts)
         facts = set_aggregate_facts(facts)
         facts = set_etcd_facts_if_unset(facts)
-        facts = self.init_in_docker_facts(facts)
+        facts = self.set_containerized_facts_if_unset(facts)
         return dict(openshift=facts)
 
     def get_defaults(self, roles):
@@ -1200,47 +1200,54 @@ class OpenShiftFacts(object):
         self.changed = changed
         return new_local_facts
 
-    def init_in_docker_facts(self, facts):
-        facts['is_containerized'] = os.path.isfile('/run/ostree-booted')
+    def set_containerized_facts_if_unset(self, facts):
         deployment_type = facts['common']['deployment_type']
-
-        # TODO: Most of these shouldn't actually make it into the facts
-        docker = dict()
         if deployment_type in ['enterprise','openshift-enterprise']:
-            docker['master_image_name'] = 'openshift3/ose'
-            docker['ovs_image_name'] = 'openshift3/openvswitch'
-            docker['node_image_name'] = 'openshift3/node'
-            docker['etcd_image_name'] = 'rhel7/etcd'
+            master_image = 'openshift3/ose'
+            cli_image = master_image
+            node_image = 'openshift3/node'
+            ovs_image = 'openshift3/openvswitch'
+            etcd_image = 'registry.access.redhat.com/rhel7/etcd'
         elif deployment_type == 'atomic-enterprise':
-            docker['master_image_name'] = 'aep3/aep'
-            docker['ovs_image_name'] = 'aep3/openvswitch'
-            docker['node_image_name'] = 'aep3/node'
-            docker['etcd_image_name'] = 'rhel7/etcd'
+            master_image = 'aep3_beta/aep'
+            cli_image = master_image
+            node_image = 'aep3_beta/node'
+            ovs_image = 'aep3_beta/openvswitch'
+            etcd_image = 'registry.access.redhat.com/rhel7/etcd'
         else:
-            docker['master_image_name'] = 'openshift/origin'
-            docker['ovs_image_name'] = 'openshift/openvswitch'
-            docker['node_image_name'] = 'openshift/node'
-            docker['etcd_image_name'] = 'rhel7/etcd'
-
-        docker['image_version'] = 'latest'
-        docker['etcd_image_version'] = 'latest'
-
-        docker['master_image'] = "%s:%s" % (docker['master_image_name'], docker['image_version'])
-        docker['ovs_image'] = "%s:%s" % (docker['ovs_image_name'], docker['image_version'])
-        docker['node_image'] = "%s:%s" % (docker['node_image_name'], docker['image_version'])
-        docker['etcd_image'] = "%s:%s" % (docker['etcd_image_name'], docker['etcd_image_version'])
-
+            master_image = 'openshift/origin'
+            cli_image = master_image
+            node_image = 'openshift/node'
+            ovs_image = 'openshift/openvswitch'
+            etcd_image = 'registry.access.redhat.com/rhel7/etcd'
+        
+        facts['common']['is_atomic'] = os.path.isfile('/run/ostree-booted')
+        if 'is_containerized' not in facts['common']:
+            facts['common']['is_containerized'] = facts['common']['is_atomic']
+        if 'cli_image' not in facts['common']:
+            facts['common']['cli_image'] = cli_image
+        if 'master' in facts:
+            if 'master_image' not in facts['master']:
+                facts['master']['master_image'] = master_image
+        if 'node' in facts:
+            if 'node_image' not in facts ['node']:
+                facts['node']['node_image'] = node_image
+            if 'ovs_image' not in facts ['node']:
+                facts['node']['ovs_image'] = ovs_image
+        if 'etcd' in facts:
+            if 'etcd_image' not in facts['etcd']:
+                facts['etcd']['etcd_image'] = etcd_image
+        
         # shared /tmp/openshift vol is for file exchange with ansible
         # --privileged is required to read the config dir
         # --net host to access openshift from the container
         # maybe -v /var/run/docker.sock:/var/run/docker.sock is required as well
-        docker['runner'] = "docker run --rm --privileged --net host -v /tmp/openshift:/tmp/openshift -v {datadir}:{datadir} -v {confdir}:{confdir} -e KUBECONFIG={confdir}/master/admin.kubeconfig {image}".format(confdir=facts['common']['config_base'], datadir=facts['common']['data_dir'], image=docker['master_image'])
+        runner = "docker run --rm --privileged --net host -v /tmp/openshift:/tmp/openshift -v {datadir}:{datadir} -v {confdir}:{confdir} -e KUBECONFIG={confdir}/master/admin.kubeconfig {image}".format(confdir=facts['common']['config_base'], datadir=facts['common']['data_dir'], image=facts['common']['cli_image'])
 
-        if facts['is_containerized']:
-            facts['common']['client_binary'] = '%s cli' % docker['runner']
-            facts['common']['admin_binary'] = '%s admin' % docker['runner']
+        if facts['common']['is_containerized']:
+            facts['common']['client_binary'] = '%s cli' % runner
+            facts['common']['admin_binary'] = '%s admin' % runner
 
-        facts['docker'] = docker
         return facts
 
 

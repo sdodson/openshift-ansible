@@ -1,7 +1,7 @@
 ---
 - name: Install NFS server
   yum: name=nfs-utils state=present
-  when: not is_containerized | bool
+  when: not openshift.common.is_containerized | bool
 
 - name: Start rpcbind
   service: name=rpcbind state=started enabled=yes

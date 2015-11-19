@@ -17,6 +17,9 @@
 - fail:
     msg: "openshift_master_cluster_password must be set for multi-master installations"
   when: openshift_master_ha | bool and openshift_master_cluster_method == "pacemaker" and (openshift_master_cluster_password is not defined or not openshift_master_cluster_password)
+- fail:
+    msg: "Pacemaker based HA is not supported at this time when used with containerized installs"
+  when: openshift_master_ha | bool and openshift_master_cluster_method == "pacemaker" and openshift.common.is_containerized | bool
 
 - name: Set master facts
   openshift_facts:
@@ -73,29 +76,30 @@
       disabled_features: "{{ osm_disabled_features | default(None) }}"
       master_count: "{{ openshift_master_count | default(None) }}"
       controller_lease_ttl: "{{ osm_controller_lease_ttl | default(None) }}"
+      master_image: "{{ osm_image | default(None) }}"
 
 - name: Install Master package
   yum: pkg={{ openshift.common.service_type }}-master{{ openshift_version  }} state=present
   register: install_result
-  when: not is_containerized | bool
+  when: not openshift.common.is_containerized | bool
 
 # TODO: enable when ansible#1993 lands and is widespread enough
 # - name: Docker image present
 #   docker:
 #     image: "{{ openshift.common.docker.image }}"
 #     state: image_present
-#   when: is_containerized | bool
+#   when: openshift.common.is_containerized | bool
 
 - name: Install Master docker service file
   template:
     dest: "/etc/systemd/system/{{ openshift.common.service_type }}-master.service"
     src: master.docker.service.j2
   register: install_result
-  when: is_containerized | bool
+  when: openshift.common.is_containerized | bool and not openshift_master_ha | bool
 
 - name: Reload systemd units
   command: systemctl daemon-reload
-  when: is_containerized and install_result | changed
+  when: openshift.common.is_containerized and install_result | changed
 
 # TODO: These values need to be configurable
 - name: Set dns facts
@@ -136,7 +140,7 @@
   yum: pkg=httpd-tools state=present
   when: item.kind == 'HTPasswdPasswordIdentityProvider'
   with_items: openshift.master.identity_providers
-  when: not is_containerized | bool
+  when: not openshift.common.is_containerized | bool
 
 - name: Ensure htpasswd directory exists
   file:
@@ -158,11 +162,12 @@
   set_fact:
     ha_suffix: ""
     ha_svcdir: "/usr/lib/systemd/system"
-- name: Set ha suffix
+
+- name: Set HA Service Info for containerized installs
   set_fact:
     ha_suffix: ".docker"
     ha_svcdir: "/etc/systemd/system"
-  when: is_containerized | bool
+  when: openshift.common.is_containerized | bool
 
 # workaround for missing systemd unit files for controllers/api
 - name: Create the api service file
@@ -292,11 +297,13 @@
 - name: Install cluster packages
   yum: pkg=pcs state=present
   when: openshift_master_ha | bool and openshift.master.cluster_method == 'pacemaker'
+    and not openshift.common.is_containerized | bool
   register: install_result
 
 - name: Start and enable cluster service
   service: name=pcsd enabled=yes state=started
   when: openshift_master_ha | bool and openshift.master.cluster_method == 'pacemaker'
+    and not openshift.common.is_containerized | bool
 
 - name: Set the cluster user password
   shell: echo {{ openshift_master_cluster_password | quote }} | passwd --stdin hacluster

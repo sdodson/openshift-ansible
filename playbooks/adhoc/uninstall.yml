@@ -19,6 +19,7 @@
       failed_when: false
       register: ostree_output
 
+      # Since we're not calling openshift_facts we'll do this for now
     - set_fact:
         is_atomic: "{{ ostree_output.rc == 0 }}"
     - set_fact:
