@@ -6,9 +6,9 @@
     role: common
     local_facts:
       deployment_type: "{{ openshift_deployment_type }}"
-      docker_additional_registries: "{{ docker_additional_registries | oo_split() }}"
-      docker_insecure_registries: "{{ docker_insecure_registries | oo_split() }}"
-      docker_blocked_registries: "{{ docker_blocked_registries | oo_split() }}"
+      docker_additional_registries: "{{ docker_additional_registries }}"
+      docker_insecure_registries: "{{ docker_insecure_registries }}"
+      docker_blocked_registries: "{{ docker_blocked_registries }}"
 
 - name: Set registry params
   lineinfile:

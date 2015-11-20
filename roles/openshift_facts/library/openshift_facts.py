@@ -651,10 +651,10 @@ def set_deployment_facts_if_unset(facts):
 
 
         if deployment_type in ['enterprise', 'atomic-enterprise', 'openshift-enterprise']:
-            addtl_regs = facts['common']['docker_additional_registries']:
+            addtl_regs = facts['common'].get('docker_additional_registries', [])
             ent_reg = 'registry.access.redhat.com'
-            if ent_reg not in addtl_regs
-                facts['common']['docker_additional_registries'].append(ent_reg)
+            if ent_reg not in addtl_regs:
+                facts['common']['docker_additional_registries'] = addtl_regs.append(ent_reg)
 
 
     for role in ('master', 'node'):
