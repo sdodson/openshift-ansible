@@ -11,5 +11,8 @@
   with_items:
     - PyYAML
 
-- name: Gather Cluster facts
+- name: Gather Cluster facts and set is_containerized if needed
   openshift_facts:
+    role: common
+    local_facts:
+      is_containerized: "{{ openshift_containerized | default(None) }}"
