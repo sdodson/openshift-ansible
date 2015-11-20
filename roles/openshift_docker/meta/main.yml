@@ -1,8 +1,8 @@
 ---
 galaxy_info:
-  author: Kenny Woodson
-  description: Docker
-  company: Red Hat, Inc
+  author: Jason DeTiberus
+  description: OpenShift Docker
+  company: Red Hat, Inc.
   license: Apache License, Version 2.0
   min_ansible_version: 1.9
   platforms:
@@ -11,4 +11,6 @@ galaxy_info:
     - 7
   categories:
   - cloud
-dependencies: []
+dependencies:
+- { role: openshift_common }
+- { role: docker }

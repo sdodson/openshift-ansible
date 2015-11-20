@@ -643,6 +643,20 @@ def set_deployment_facts_if_unset(facts):
                 data_dir = '/var/lib/openshift'
             facts['common']['data_dir'] = data_dir
 
+        # remove duplicate and empty strings from registry lists
+        for cat in  ['additional', 'blocked', 'insecure']:
+            key = 'docker_{0}_registries'.format(cat)
+            if key in facts['common']:
+                facts['common'][key] = set(facts['common'][key]) - set([''])
+
+
+        if deployment_type in ['enterprise', 'atomic-enterprise', 'openshift-enterprise']:
+            addtl_regs = facts['common']['docker_additional_registries']:
+            ent_reg = 'registry.access.redhat.com'
+            if ent_reg not in addtl_regs
+                facts['common']['docker_additional_registries'].append(ent_reg)
+
+
     for role in ('master', 'node'):
         if role in facts:
             deployment_type = facts['common']['deployment_type']
@@ -1220,7 +1234,7 @@ class OpenShiftFacts(object):
             node_image = 'openshift/node'
             ovs_image = 'openshift/openvswitch'
             etcd_image = 'registry.access.redhat.com/rhel7/etcd'
-        
+
         facts['common']['is_atomic'] = os.path.isfile('/run/ostree-booted')
         if 'is_containerized' not in facts['common']:
             facts['common']['is_containerized'] = facts['common']['is_atomic']
@@ -1237,7 +1251,7 @@ class OpenShiftFacts(object):
         if 'etcd' in facts:
             if 'etcd_image' not in facts['etcd']:
                 facts['etcd']['etcd_image'] = etcd_image
-        
+
         # shared /tmp/openshift vol is for file exchange with ansible
         # --privileged is required to read the config dir
         # --net host to access openshift from the container

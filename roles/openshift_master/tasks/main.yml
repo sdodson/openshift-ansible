@@ -193,7 +193,7 @@
     src: atomic-openshift-master-controllers.j2
     dest: /etc/sysconfig/{{ openshift.common.service_type }}-master-controllers
     force: no
-  when: openshift_master_ha | bool and openshift_master_cluster_method == "native"  
+  when: openshift_master_ha | bool and openshift_master_cluster_method == "native"
 - command: systemctl daemon-reload
   when: openshift_master_ha | bool and openshift_master_cluster_method == "native"
 # end workaround for missing systemd unit files
@@ -264,7 +264,7 @@
   service: name={{ openshift.common.service_type }}-master enabled=yes state=started
   when: not openshift_master_ha | bool
   register: start_result
-  
+
 - name: Stop and disable non HA master when running HA
   service: name={{ openshift.common.service_type }}-master enabled=no state=stopped
   when: openshift_master_ha | bool
