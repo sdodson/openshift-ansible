@@ -1,7 +1,4 @@
 ---
-- debug: var=docker_additional_registries
-- debug: var=docker_blocked_registries
-- debug: var=docker_insecure_registries
 - openshift_facts:
     role: common
     local_facts:
@@ -13,8 +10,8 @@
 - name: Set registry params
   lineinfile:
     dest: /etc/sysconfig/docker
-    regexp: '^{{ reg_conf_var }}=.*$'
-    line: "{{ reg_conf_var }}='{{ reg_fact_val | oo_prepend_strings_in_list(reg_flag ~ ' ') | join(' ') }}'"
+    regexp: '^{{ item.reg_conf_var }}=.*$'
+    line: "{{ item.reg_conf_var }}='{{ item.reg_fact_val | oo_prepend_strings_in_list(item.reg_flag ~ ' ') | join(' ') }}'"
   when: "'docker_additional_registries' in openshift.common"
   with_items:
   - reg_conf_var: ADD_REGISTRY

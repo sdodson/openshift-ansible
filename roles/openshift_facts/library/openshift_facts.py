@@ -647,7 +647,7 @@ def set_deployment_facts_if_unset(facts):
         for cat in  ['additional', 'blocked', 'insecure']:
             key = 'docker_{0}_registries'.format(cat)
             if key in facts['common']:
-                facts['common'][key] = set(facts['common'][key]) - set([''])
+                facts['common'][key] = list(set(facts['common'][key]) - set(['']))
 
 
         if deployment_type in ['enterprise', 'atomic-enterprise', 'openshift-enterprise']:
