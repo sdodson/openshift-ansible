@@ -2,12 +2,27 @@
 - include: evaluate_groups.yml
 
 - include: ../openshift-docker/config.yml
+  vars:
+    openshift_cluster_id: "{{ cluster_id | default('default') }}"
+    openshift_debug_level: "{{ debug_level | default(2) }}"
+    openshift_deployment_type: "{{ deployment_type }}"
 
 - include: ../openshift-etcd/config.yml
+  vars:
+    openshift_cluster_id: "{{ cluster_id | default('default') }}"
+    openshift_debug_level: "{{ debug_level | default(2) }}"
+    openshift_deployment_type: "{{ deployment_type }}"
 
 - include: ../openshift-master/config.yml
+  vars:
+    openshift_cluster_id: "{{ cluster_id | default('default') }}"
+    openshift_debug_level: "{{ debug_level | default(2) }}"
+    openshift_deployment_type: "{{ deployment_type }}"
 
 - include: ../openshift-node/config.yml
   vars:
+    openshift_cluster_id: "{{ cluster_id | default('default') }}"
+    openshift_debug_level: "{{ debug_level | default(2) }}"
+    openshift_deployment_type: "{{ deployment_type }}"
     osn_cluster_dns_domain: "{{ hostvars[groups.oo_first_master.0].openshift.dns.domain }}"
     osn_cluster_dns_ip: "{{ hostvars[groups.oo_first_master.0].cluster_dns_ip }}"
