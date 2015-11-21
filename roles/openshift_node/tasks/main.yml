@@ -36,7 +36,7 @@
       storage_plugin_deps: "{{ osn_storage_plugin_deps | default(None) }}"
       node_image: "{{ osn_image | default(None) }}"
       ovs_image: "{{ osn_ovs_image | default(None) }}"
-      
+
 
 # We have to add tuned-profiles in the same transaction otherwise we run into depsolving
 # problems because the rpms don't pin the version properly. This was fixed in 3.1 packaging.
@@ -50,12 +50,28 @@
   register: sdn_install_result
   when: openshift.common.use_openshift_sdn and not openshift.common.is_containerized | bool
 
+- name: Get docker images
+  command: docker images
+  changed_when: false
+  when: openshift.common.is_containerized | bool
+  register: docker_images
+
+- name: Pull required docker image
+  command: >
+    docker pull {{ openshift.node.node_image }}
+  when: openshift.common.is_containerized | bool and openshift.node.node_image not in docker_images.stdout
+
 - name: Install Node docker service file
   template:
     dest: "/etc/systemd/system/{{ openshift.common.service_type }}-node.service"
     src: openshift.docker.node.service
   register: install_node_result
   when: openshift.common.is_containerized | bool
+
+- name: Pull required docker image
+  command: >
+    docker pull {{ openshift.node.ovs_image }}
+  when: openshift.common.is_containerized | bool and openshift.node.ovs_image not in docker_images.stdout
 
 - name: Install OpenvSwitch docker service file
   template:
