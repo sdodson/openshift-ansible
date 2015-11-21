@@ -934,6 +934,7 @@ def save_local_facts(filename, facts):
             os.makedirs(fact_dir)
         with open(filename, 'w') as fact_file:
             fact_file.write(module.jsonify(facts))
+        os.chmod(filename, 0o600)
     except (IOError, OSError) as ex:
         raise OpenShiftFactsFileWriteError(
             "Could not create fact file: %s, error: %s" % (filename, ex)
