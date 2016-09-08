@@ -33,7 +33,7 @@ they may in the future.
 
 - Directory Structure:
   - [bin/cluster](bin/cluster) - python script to easily create clusters
-  - [docs](docs) - Documentation for the project
+  - [docs/](docs) - Documentation for the project
   - [filter_plugins/](filter_plugins) - custom filters used to manipulate data in Ansible
   - [inventory/](inventory) - houses Ansible dynamic inventory scripts
   - [playbooks/](playbooks) - houses host-type Ansible playbooks (launch, config, destroy, vars)
