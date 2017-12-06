@@ -51,13 +51,11 @@
 
   - name: Drain Node for Kubelet upgrade
     command: >
-      {{ openshift.common.admin_binary }} drain {{ openshift.node.nodename }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig --force --delete-local-data --ignore-daemonsets
+      {{ openshift.common.admin_binary }} drain {{ openshift.node.nodename }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig --force --delete-local-data --ignore-daemonsets --timeout={{ openshift_upgrade_nodes_drain_timeout | default('3600') }}s
     delegate_to: "{{ groups.oo_first_master.0 }}"
     when: l_docker_upgrade is defined and l_docker_upgrade | bool and inventory_hostname in groups.oo_nodes_to_upgrade
-    register: l_docker_upgrade_drain_result
-    until: not l_docker_upgrade_drain_result | failed
-    retries: 60
-    delay: 60
+    register: l_docker_upgrade_drain
+    failed_when: l_docker_upgrade_drain.rc != 0 and 'Drain did not complete within' not in l_docker_upgrade_drain.stdout
 
   - include: tasks/upgrade.yml
     when: l_docker_upgrade is defined and l_docker_upgrade | bool

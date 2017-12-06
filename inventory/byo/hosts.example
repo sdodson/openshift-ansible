@@ -964,6 +964,9 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #openshift_upgrade_control_plane_nodes_serial=1
 #openshift_upgrade_control_plane_nodes_max_fail_percentage=0
 #
+# time in seconds to wait for nodes to drain before moving on
+#openshift_upgrade_nodes_drain_timeout=3600
+#
 # You can specify the number of nodes to upgrade at once. We do not currently
 # attempt to verify that you have capacity to drain this many nodes at once
 # so please be careful when specifying these values. You should also verify that
