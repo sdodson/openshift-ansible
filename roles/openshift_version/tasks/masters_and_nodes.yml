@@ -9,7 +9,7 @@
       msg: "OCP rpm version {{ rpm_results.results.versions.available_versions.0 }} is different from OCP image version {{ openshift_version }}"
     # Both versions have the same string representation
     when:
-    - openshift_version not in rpm_results.results.versions.available_versions.0 
+    - openshift_version not in rpm_results.results.versions.available_versions.0
     - openshift_version_reinit | default(false)
 
   # block when
