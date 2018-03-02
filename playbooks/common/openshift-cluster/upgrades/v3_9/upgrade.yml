@@ -5,3 +5,5 @@
 - import_playbook: upgrade_control_plane.yml
 
 - import_playbook: upgrade_nodes.yml
+
+- import_playbook: label_nodes.yml
