@@ -2,6 +2,7 @@
 
 - hosts: oo_first_master
   roles:
+    - openshift_facts
     - lib_openshift
   post_tasks:
     - when: osm_default_node_selector is not defined
