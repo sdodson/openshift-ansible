@@ -27,8 +27,10 @@
                 value: true
           with_items: '{{ non_master_non_infra_nodes }}'
 
-- hosts: masters
-  tasks:
+- hosts: oo_masters_to_config
+  roles:
+    - openshift_facts
+  post_tasks:
     - when: osm_default_node_selector is not defined
       block:
         - name: Change default node selector to compute=true
