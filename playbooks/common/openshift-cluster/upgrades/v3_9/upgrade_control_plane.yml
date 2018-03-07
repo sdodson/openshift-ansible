@@ -135,6 +135,8 @@
       enabled: true
     when: openshift.common.rolling_restart_mode == 'system'
 
+- import_playbook: label_nodes.yml
+
 - import_playbook: ../post_control_plane.yml
 
 - hosts: oo_masters
