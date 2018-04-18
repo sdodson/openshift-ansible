@@ -20,7 +20,7 @@ best.
 |* rpm + docker                         | docker,crio,node rpms + pods | highest  |
 |* rpm + docker + crio                  | docker,crio,node rpms + pods | medium   |
 |* rpm + system-container-docker + crio | docker,crio,node rpms + pods | low      |
-|* rpm + crio only |                    | docker,crio,node rpms + pods | lowest   |
+|* rpm + crio only                      | docker,crio,node rpms + pods | lowest   |
 |* rpm + system-container-docker + system-container-crio | docker,crio,node rpm + pods | low |
 
 ### Containerized
