@@ -74,12 +74,16 @@
   - networkConfig.clusterNetworkCIDR
   - networkConfig.hostSubnetLength
 
-
+# This probably always skipped because of openshift_control_plane role
+# being called before this point
 - name: Create the master service env file if it does not exist
   template:
     src: "master.env.j2"
     dest: "{{ openshift.common.config_base }}/master/master.env"
     force: no
+    owner: root
+    group: root
+    mode: 0600
 
 - name: Update oreg value
   yedit:
