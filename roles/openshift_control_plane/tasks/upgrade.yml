@@ -73,7 +73,24 @@
   with_items:
   - networkConfig.clusterNetworkCIDR
   - networkConfig.hostSubnetLength
+- pause: prompt="test"
+- name: Check for /etc/sysconfig/atomic-openshift-master-api
+  stat:
+    path: /etc/sysconfig/atomic-openshift-master-api
+  register: _api_sysconfig
 
+# Copy /etc/sysconfig/atomic-openshift-master-api to /etc/origin/master/master.env
+- name: Copy legacy environment file to /etc/origin/master/master.env
+  copy:
+    src: /etc/sysconfig/atomic-openshift-master-api
+    dest: "{{ openshift.common.config_base }}/master/master.env"
+    force: no
+    remote_src: yes
+    mode: 0600
+    owner: root
+    group: root
+  when: _api_sysconfig.stat.exists
+- pause: prompt="test2"
 # This probably always skipped because of openshift_control_plane role
 # being called before this point
 - name: Create the master service env file if it does not exist
